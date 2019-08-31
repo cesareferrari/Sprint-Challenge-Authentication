@@ -9,7 +9,7 @@ router.post('/register', async (req, res) => {
 
   try {
     const newUser = await User.add(user);
-    console.log("newUser", newUser);
+
     if (newUser) {
       res.status(201).json(newUser);
     } else {
@@ -20,8 +20,21 @@ router.post('/register', async (req, res) => {
   }
 });
 
-router.post('/login', (req, res) => {
-  // implement login
+router.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const user = await User.findByUsername(username)
+
+    if (user && bcrypt.compareSync(password, user.password)) {
+      res.status(200).json({message: `Welcome ${user.username}`});
+    } else {
+      res.status(401).json({message: "Invalid credentials"});
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Error retrieving the user"});
+  }
 });
 
 module.exports = router;
